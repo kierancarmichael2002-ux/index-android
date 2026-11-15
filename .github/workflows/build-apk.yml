@@ -1,0 +1,38 @@
+name: Build INDEX APK
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'index-android-source.zip'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Extract Android project
+        run: |
+          unzip index-android-source.zip -d project
+          find project -name gradlew -exec chmod +x {} \;
+
+      - name: Build APK
+        run: |
+          cd project
+          ./gradlew assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: INDEX-APK
+          path: project/**/build/outputs/apk/debug/*.apk
+        
